@@ -179,14 +179,13 @@
                     window.addEventListener("scroll", event => {
                         const direction = this.currentScrollPos < window.scrollY ? 'down' : 'up';
                         this.currentScrollPos = window.scrollY;
+                        if(direction !== 'down' || this.fetchInProgress) return;
                         console.log(direction);
                         this.onScrollEnd(() => console.log("scroll end"));
                         if (isInViewport(document.querySelector(".load-more-button"))) {
                             this.onScrollStart(() => {
                                 console.log("scroll start");
-                                if (!this.fetchInProgress && direction === 'down') {
-                                    this.fetchData();
-                                }
+                                this.fetchData();
                             });
                         }
                     });
