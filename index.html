@@ -157,14 +157,14 @@
             function isInViewport(elem) {
                 const rect = elem.getBoundingClientRect();
                 return (
-                    rect.top >= 0 &&
-                    rect.left >= 0 &&
-                    rect.bottom <=
-                        (window.innerHeight ||
-                            document.documentElement.clientHeight) &&
-                    rect.right <=
-                        (window.innerWidth ||
-                            document.documentElement.clientWidth)
+                    rect.top >= 0
+                    && rect.left >= 0
+                    && rect.bottom <=
+                    (window.innerHeight ||
+                        document.documentElement.clientHeight)
+                    && rect.right <=
+                    (window.innerWidth ||
+                        document.documentElement.clientWidth)
                 );
             }
 
@@ -173,21 +173,20 @@
                     this.resultlistDom = document.querySelector(".result-list");
                     this.loaderDom = document.querySelector('.loader');
                     this.scrollTimestamp = null;
-                    this.currentScrollPos = window.scrollY;
-                    this.resultsPage = 0;
+                    this.pageNumber = 0;
                     this.fetchInProgress = false;
+                    let currentScrollPos = window.scrollY;
                     window.addEventListener("scroll", event => {
-                        const direction = this.currentScrollPos < window.scrollY ? 'down' : 'up';
-                        this.currentScrollPos = window.scrollY;
+                        const direction = currentScrollPos < window.scrollY ? 'down' : 'up';
+                        currentScrollPos = window.scrollY;
                         if(direction !== 'down' || this.fetchInProgress) return;
-                        console.log(direction);
-                        this.onScrollEnd(() => console.log("scroll end"));
                         if (isInViewport(document.querySelector(".load-more-button"))) {
                             this.onScrollStart(() => {
                                 console.log("scroll start");
                                 this.fetchData();
                             });
                         }
+                        this.onScrollEnd(() => console.log("scroll end"));
                     });
 
                     document.querySelector('.load-more-button button').addEventListener('click', () => this.fetchData());
@@ -213,19 +212,19 @@
 
                 fetchData() {
                     this.fetchInProgress = true;
-                    this.resultsPage++;
+                    this.pageNumber++;
                     this.loaderDom.style.display = 'block';
-                    fetch(`https://randomuser.me/api/?page=${this.resultsPage}&results=8&seed=pinkpanther`)
+                    fetch(`https://randomuser.me/api/?page=${this.pageNumber}&results=8&seed=pinkpanther`)
                         .then(res => res.json())
                         .then(data => {
                             this.renderResults(data.results);
                             this.fetchInProgress = false;
                             this.loaderDom.style.display = 'none';
-                            document.querySelector('aside span').textContent = String(this.resultsPage);
+                            document.querySelector('aside span').textContent = String(this.pageNumber);
                         })
                         .catch(err => {
                             console.log('Error happened while fetching data from API');
-                            this.resultsPage--;
+                            this.pageNumber--;
                             this.fetchInProgress = false;
                         });
                 }
